@@ -1,4 +1,4 @@
-""" JSON Backend 
+""" JSON Backend
 	read/write handles: units, column comments, aliases, header keywords
 """
 from __future__ import absolute_import
@@ -117,24 +117,24 @@ class jsonBackend(BaseBackend):
 	def __init__(self, col_meta_names = None):
 		""" constructor """
 		BaseBackend.__init__(self, tableType='json')
-		self.col_meta_names = col_meta_names or ['name', 'datatype', 'format', 'unit', 'description', 'null']	
+		self.col_meta_names = col_meta_names or ['name', 'datatype', 'format', 'unit', 'description', 'null']
 
 	def read(self, filename):
 		if hasattr(filename, 'read'):
 			unit = filename
 		else:
 			unit = open(filename, 'r')
-	
+
 		d = loads( unit.read() )
 
 		if not hasattr(filename, 'read'):
 			unit.close()
-		
+
 		#generate an empty table and fill it
 		tab = Table()
 		tab.header = TableHeader(d['tablemeta'])
 
-		aliases = d['aliases']		
+		aliases = d['aliases']
 		colmeta = d['columnmeta']
 		colnames = [ k['name'] for k in colmeta ]
 		if 'dtype' in k:
@@ -153,11 +153,11 @@ class jsonBackend(BaseBackend):
 		data = np.rec.fromrecords(d['data'], names=colnames)
 
 		for i,colName in enumerate(colnames):
-			tab.add_column(colName, data[colName], 
-					unit = colunit[i] or '', 
+			tab.add_column(colName, data[colName],
+					unit = colunit[i] or '',
 					null = colnull[i] or '',
-					description = coldesc[i] or '', 
-					format = colfmt[i], 
+					description = coldesc[i] or '',
+					format = colfmt[i],
 					dtype = data.dtype[colName] )
 		#set aliases
 		for k,v in d['aliases'].iteritems():
@@ -187,14 +187,14 @@ class jsonBackend(BaseBackend):
 		d = OrderedDict()
 		d['tablemeta']  = tab.header.__dict__
 		d['columnmeta'] = [ self.writeColMeta(tab, k) for k in tab.keys() ]
-		d['aliases']    = tab._aliases 
+		d['aliases']    = tab._aliases
 		d['data']       = tab.data.tolist()
 
-		unit.write(dumps(d))
-		
+		unit.write(dumps(d, nan=nan, inf=inf, **kwargs))
+
 		if hasattr(filename, 'write'):
 			return unit
 		else:
 			unit.close()
-		
-	
+
+
