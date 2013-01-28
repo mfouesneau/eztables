@@ -4,14 +4,17 @@ ezTables v1.0dev
 This module provides table manipulations regardless of storage format
 Complete rewrite based on my old mytables package.
 
+
 * Bidirectional support (read/write): 
         **csv, ascii**
         **fits**            (requires pyfits)
         **hdf5**            (requires pytables)
         **json**            (requires json)
 
+
 * only write support: 
         **latex**
+
 
 * starting to add astro tools
 
@@ -20,7 +23,9 @@ TODO
 
 * add BLOSC compression to hdf5 tables: more load on cpu but less on disk IO 
 
+
 * cone search on position keys without vo tools
+
 
 * support more formats
 	* sqlite
@@ -28,6 +33,7 @@ TODO
 	* mysql
 	* lsd
 	* votable
+
 
 * distributed tables: chuncks of lines distributed over n-workers
 	* MPI
@@ -51,14 +57,14 @@ RANDOM IDEAS
 
 
 * develop a pytable array based for heavy computations --> better than memmap
-        * pytable is able to do fast computations even with disk access
-        * optimized expressions using tables.expr (BLAST)
-        * faster than numpy memmap, and numexpr
-        * optimized where queries: 
-           '''python
-           >>> for row in tbl.where('(sqrt(x**2 + y**2) <= 1) & (z < 100)'):
-                ... do something with row['name'], row['x']...
-           '''
+	* pytable is able to do fast computations even with disk access
+	* optimized expressions using tables.expr (BLAST)
+	* faster than numpy memmap, and numexpr
+	* optimized where queries: 
+	'''python
+	>>> for row in tbl.where('(sqrt(x**2 + y**2) <= 1) & (z < 100)'):
+	... do something with row['name'], row['x']...
+	'''
 
 
 REVISION HISTORY
