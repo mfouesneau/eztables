@@ -11,6 +11,7 @@ import operator, cStringIO
 from numpy.lib import recfunctions
 from .registered_backends import *
 from copy import deepcopy
+from .core.decorators import warning
 
 """
 Notes
@@ -813,7 +814,7 @@ def from_ndArray(obji, **kwargs):
 def from_Table(obj, **kwargs):
 	""" Generate a new table fr om a Table obj """
 #==============================================================================
-	assert( isinstance(obj, Table)), "Expecting Table object, got %s" %type(obj)
+	assert( isinstance(obj, Table)), "Expecting Table object, got %s" % type(obj)
 	return deepcopy(obj)
 
 #==============================================================================
@@ -822,3 +823,7 @@ def copyTable(tab, **kwargs):
 #==============================================================================
 	return deepcopy(tab)
 
+
+@warning(message='Deprecated function. Use Table class constructor instead.')
+def load(*args, **kwargs):
+    return Table(*args, **kwargs)
