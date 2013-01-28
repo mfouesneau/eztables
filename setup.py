@@ -13,7 +13,7 @@ setup(
     	author_email="mfouesn@uw.edu",
 	py_modules=py_modules,
 	description="High-level package providing a way to manipulate tables of data in a uniform way regardless of their sources.",
-	long_description=open("README.rst").read(),
+	long_description=open("README.md").read(),
 	classifiers=[
 		"Development Status :: 0 - Beta",
 		"Intended Audience :: Science/Research",
