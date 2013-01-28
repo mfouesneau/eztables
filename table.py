@@ -781,7 +781,7 @@ def __indent__(rows, hasHeader=False, hasUnits=False, headerChar='-', delim=' | 
 
 
 #==============================================================================
-def from_dict(obj):
+def from_dict(obj, **kwargs):
 	""" Generate a table from a recArray or numpy array """
 #==============================================================================
 	assert( hasattr(obj, 'iteritems') ), "expecting obj has iteritem attribute (dict-like)"
@@ -790,9 +790,10 @@ def from_dict(obj):
 	for k,v in obj.iteritems():
 			_v = np.asarray(v)
 			tab.add_column( k, _v, dtype = _v.dtype )
+	return tab
 
 #==============================================================================
-def from_ndArray(obj):
+def from_ndArray(obji, **kwargs):
 	""" Generate a table from a recArray or numpy array """
 #==============================================================================
 	supported_types = [ np.core.records.recarray, np.ndarray ]
@@ -809,14 +810,14 @@ def from_ndArray(obj):
 	return tab
 
 #==============================================================================
-def from_Table(obj):
-	""" Generate a new table from a Table obj """
+def from_Table(obj, **kwargs):
+	""" Generate a new table fr om a Table obj """
 #==============================================================================
 	assert( isinstance(obj, Table)), "Expecting Table object, got %s" %type(obj)
 	return deepcopy(obj)
 
 #==============================================================================
-def copyTable(tab):
+def copyTable(tab, **kwargs):
 	""" Copy a Table """
 #==============================================================================
 	return deepcopy(tab)
