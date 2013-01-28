@@ -133,7 +133,7 @@ def run_async(func, pool=None):
     return async_func
 
 
-def deprecated(message=None):
+def deprecated(message=None, stacklevel=2):
     """
     This is a decorator which can be used to mark functions as deprecated. It
     will result in a warning being emitted when the function is used.
@@ -142,13 +142,13 @@ def deprecated(message=None):
         @wraps(func)
         def new_func(*args, **kwargs):
             warnings.warn("Call to deprecated function {}. {}".format(func.__name__, message or ''),
-                        category=DeprecationWarning)
+                        category=DeprecationWarning, stacklevel=stacklevel)
             return func(*args, **kwargs)
         return new_func
     return deco
 
 
-def warning(message=None, category=UserWarning):
+def warning(message=None, category=UserWarning, stacklevel=2):
     """
     This is a decorator which can be used to mark functions with warnings. It
     will result in a warning being emitted when the function is used.
@@ -157,7 +157,7 @@ def warning(message=None, category=UserWarning):
         @wraps(func)
         def new_func(*args, **kwargs):
             warnings.warn("Call to function {}. {}".format(func.__name__, message or ''),
-                        category=category)
+                        category=category, stacklevel=stacklevel)
             return func(*args, **kwargs)
         return new_func
     return deco
