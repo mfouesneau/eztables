@@ -148,6 +148,18 @@ def deprecated(message=None, stacklevel=2):
     return deco
 
 
+def elementwise(func):
+    """ Quick and dirty elementwise function decorator it provides a quick way
+    to apply a function either on one element or a sequence of elements """
+    @wraps(func)
+    def wrapper(it):
+        if hasattr(it, '__iter__'):  # is a Sequence
+            return map(func, it)
+        else:
+            return func(it)
+    return wrapper
+
+
 def warning(message=None, category=UserWarning, stacklevel=2):
     """
     This is a decorator which can be used to mark functions with warnings. It
