@@ -794,7 +794,7 @@ def from_dict(obj, **kwargs):
 	return tab
 
 #==============================================================================
-def from_ndArray(obji, **kwargs):
+def from_ndArray(obj, **kwargs):
 	""" Generate a table from a recArray or numpy array """
 #==============================================================================
 	supported_types = [ np.core.records.recarray, np.ndarray ]
