@@ -1,4 +1,5 @@
 from table import *
+from astro import AstroTable
 __version__ = '1.0'
 __author__  = 'MF'
 import os, inspect
