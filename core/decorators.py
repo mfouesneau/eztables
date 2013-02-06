@@ -3,7 +3,7 @@
 import time
 import math
 import functools
-from functools import wraps
+from functools import wraps, partial
 from multiprocessing import Pool
 import warnings
 
@@ -152,11 +152,12 @@ def elementwise(func):
     """ Quick and dirty elementwise function decorator it provides a quick way
     to apply a function either on one element or a sequence of elements """
     @wraps(func)
-    def wrapper(it):
+    def wrapper(it, **kwargs):
         if hasattr(it, '__iter__'):  # is a Sequence
-            return map(func, it)
+            _f = partial(func, **kwargs)
+            return map(_f, it)
         else:
-            return func(it)
+            return func(it, **kwargs)
     return wrapper
 
 
