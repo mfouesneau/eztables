@@ -7,7 +7,7 @@ from core import basebackend
 
 __all__ = ['register_extension', 'determine_type']
 
-global __extensions__ 
+global __extensions__
 __extensions__ = {}
 
 #==============================================================================
@@ -15,17 +15,17 @@ __extensions__ = {}
 #==============================================================================
 
 def register_extension( extensions,
-			backend=None, 
-			readerFunction=None, 
-			writerFunction=None, 
+			backend=None,
+			readerFunction=None,
+			writerFunction=None,
 			override=False):
 	"""
 	Register storage supports from either a Backend object or individual
 	read/write functions
-	
+
 	INPUTS:
 		extensions	[str or seq]    register particular extensions
-	
+
 	KEYWORDS:
 		backend		[Backend]	core.basebackend.BaseBackend Object
 		readerFunction 	[function]	function required for the reading part
@@ -34,12 +34,12 @@ def register_extension( extensions,
 				  		this function should return a Table object
 				  		Will receive a Table object as input
 				  		and should also handle extra **kwargs
-		override 	[bool]		redefine the file manager if already registered. 
+		override 	[bool]		redefine the file manager if already registered.
 	"""
 	if not hasattr(extensions, '__iter__'):
 		extensions = [extensions]
-	
-	#if backend is not None:	
+
+	#if backend is not None:
 	#	assert(isNestedInstance(backend, basebackend.BaseBackend)), "backend is expected to be a core.basebackend.BaseBackend instance"
 	if backend is None:
 		assert((readerFunction is not None) & (writerFunction is not None)), "read/write functions required"
@@ -52,7 +52,7 @@ def register_extension( extensions,
 			raise Exception("Type %s is already defined" % k)
 
 def determine_type(string, verbose=True):
-	""" 
+	"""
 	Determine the type of a table from its extension and try to give the
 	point to the appropriate registered extension
 	"""
@@ -67,13 +67,13 @@ def determine_type(string, verbose=True):
 		extension = s
 	else:
 		extension = s.split('.')[-1]
-		
+
 		if extension in ['gz', 'bzip2', 'Z']:
 			raise Exception('Compressed files are not managed yet.')
 
 		elif extension in ['sav', 'idl', 'idlsav']:
 			raise Exception('Warning: IDL save files are not managed yet.')
-			
+
 	if extension in __extensions__:
 		tableType = __extensions__[extension]
 		if verbose:

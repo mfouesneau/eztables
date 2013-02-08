@@ -5,7 +5,8 @@ import os, inspect, sys
 localpath = '/'.join(os.path.abspath(inspect.getfile(inspect.currentframe())).split('/')[:-1])
 import numpy as np
 from .basebackend import BaseBackend
-from ..core.tableheader import TableHeader
+#from ..core.tableheader import TableHeader
+from ..core import helpers
 from ..table import Table
 import tables
 
@@ -46,7 +47,7 @@ class hdf5Backend(BaseBackend):
 		INPUTS:
 
 			dtype_	dtype	dtype of a ndarray
-			shape_	dict	a dictionary of column's shapes 
+			shape_	dict	a dictionary of column's shapes
 
 		OUTPUTS:
 			Description of a new table
@@ -67,9 +68,9 @@ class hdf5Backend(BaseBackend):
 			if kind in 'biufSc':
 				#col = tables.Col.from_dtype(dtype, pos=pos)
 				if len(shape) > 1:
-					col = typeDict[dtype.type](shape=shape) 
+					col = typeDict[dtype.type](shape=shape)
 				else:
-					col = typeDict[dtype.type]() 
+					col = typeDict[dtype.type]()
 			# Nested column
 			elif kind == 'V' and dtype.shape in [(), (1,)]:
 				col, _ = descr_from_dtype(dtype)
@@ -86,7 +87,7 @@ class hdf5Backend(BaseBackend):
 			print "TAB CREATE"
 			shapes = {}
 			for k in tab.colnames: shapes[k] = tab[k].shape
-			desc = self.descr_from_dtype(tab.dtype, shapes) 
+			desc = self.descr_from_dtype(tab.dtype, shapes)
 			print desc
 			if group[-1] == '/':
 				group = group[:-1]
@@ -98,7 +99,7 @@ class hdf5Backend(BaseBackend):
 			return t
 
 	def write(self, tab, output='exportedData.hd5', group='/' ,
-			mode='w', tablename = None, 
+			mode='w', tablename = None,
 			append=False, silent=False, keep_open = False):
 
 		if hasattr(output, 'read'):
@@ -138,7 +139,7 @@ class hdf5Backend(BaseBackend):
 			t.attrs[k] = v
 		if not 'TITLE' in tab.header:
 			t.attrs['TITLE'] = tablename
-	
+
 		#add Column descriptions
 		for colname, col in tab.columns.iteritems():
 			key = [ k for k in t.attrs._v_attrnames if t.attrs[k] == colname ]
@@ -168,7 +169,7 @@ class hdf5Backend(BaseBackend):
 			meta[ attrmap[il] ] = tab.attrs.__dict__.get( (key+l).upper(), '')
 
 		return meta
-			
+
 	def read(self, filename, tableName=None, silent=False, *args, **kwargs):
 
 		source = tables.openFile(filename, *args, **kwargs)
@@ -185,18 +186,18 @@ class hdf5Backend(BaseBackend):
 			print "\tLoading table: %s" % tableName
 
 		#read data
-		data = node[:] 
+		data = node[:]
 
 		#generate a Table
 		tab = Table(data)
 
 		#update column meta
 		for colname,colhdr in tab.columns.iteritems():
-			meta = self.readColDesc(node, colname)	
+			meta = self.readColDesc(node, colname)
 			for mk, mv in meta.iteritems():
 				if mk != 'null':
 					if (mk == 'format') & (mv in ['', None, 'None']):
-						mv = helpers.default_format.get(tab.dtype[colname], '') 
+						mv = helpers.default_format.get(tab.dtype[colname], '')
 					colhdr.__setattr__(mk,mv)
 
 
@@ -209,7 +210,7 @@ class hdf5Backend(BaseBackend):
 				c0, c1 = node.attrs[k].split('=')
 				tab.set_alias(c0, c1)
 
-		empty_name = ['', 'None', 'Noname', None] 
+		empty_name = ['', 'None', 'Noname', None]
 		if (tab.header['NAME'] in empty_name) & (tab.header.__dict__.get('TITLE', None) not in empty_name):
 			tab.header['NAME'] = tab.header['TITLE']
 
