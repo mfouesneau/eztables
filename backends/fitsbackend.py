@@ -4,7 +4,6 @@
 from __future__ import absolute_import
 import os
 import inspect
-import sys
 localpath = '/'.join(os.path.abspath(inspect.getfile(inspect.currentframe())).split('/')[:-1])
 import pyfits
 import numpy as np
@@ -142,15 +141,15 @@ class fitsBackend(BaseBackend):
             clobber -- overwrite if set (def: False)
             append  -- add data to existing file (def: True)
         """
-        if hasattr(output, 'write'):
-            unit = output
-        else:
-            unit = open(output, 'w')
-            if (not os.path.isfile(output)) & append:
-                if not silent:
-                    print "Warning: %s does not seem to exist" % output
-                    print "         Creating a new file."
-                append = False
+        #if hasattr(output, 'write'):
+        #    unit = output
+        #else:
+        #    unit = pyfits.open(output, 'w')
+        #    if (not os.path.isfile(output)) & append:
+        #        if not silent:
+        #            print "Warning: %s does not seem to exist" % output
+        #            print "         Creating a new file."
+        #        append = False
 
         keys = tab.keys()
 
@@ -205,7 +204,7 @@ class fitsBackend(BaseBackend):
         if hasattr(output, 'write'):
             hdr.writeto(output)
         elif not append:
-            hdr.writeto(unit, clobber=clobber)
+            hdr.writeto(output, clobber=clobber)
             if not silent:
                 print "Data exported into %s" % output
         else:
