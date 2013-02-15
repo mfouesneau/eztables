@@ -61,7 +61,6 @@ class Table(object):
 		    	The table name
 		"""
 		self.__set_defaults__()
-		self.set_name( kwargs.get('name', None) )
 
 		if len(args)>0:
 			if isinstance(args[0], self.__class__):
@@ -72,6 +71,7 @@ class Table(object):
 				self.__set_from_table__(from_dict(*args, **kwargs))
 			else:
 				self.read(*args, **kwargs)
+		self.set_name( kwargs.get('name', None) )
 
 	def read(self, filename, type=None, manager=None, silent=False, **kwargs):
 		""" This function is a general function aiming at reading files.
