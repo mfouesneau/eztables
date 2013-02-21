@@ -96,7 +96,7 @@ class csvBackend(BaseBackend):
 
 	def readData(self, filename, skiprows, *args, **kwargs):
 		""" returns the recarray of the data """
-		return np.recfromcsv(filename, skiprows=skiprows-1, *args, **kwargs) 
+		return np.recfromcsv(filename, skiprows=skiprows-1, *args, **kwargs)
 
 
 	def read(self, filename, delimiter=',', noheader=False, skiprows=0, comment='#', *args, **kwargs):
@@ -105,7 +105,7 @@ class csvBackend(BaseBackend):
 		exportdata module.
 		So far it uses also the np.recfromcsv method
 		"""
-		
+
 		#Get header
 		nHeadLines, description, colInfo, header, aliases = self.readHeader(filename, comment, noheader, delimiter)
 
@@ -114,7 +114,7 @@ class csvBackend(BaseBackend):
 			if not filename.closed:
 				filename.seek(0)
 		skip = skiprows+(nHeadLines-int(noheader))
-		d = self.readData(filename, skiprows=skip, *args, **kwargs) 
+		d = self.readData(filename, skiprows=skip, *args, **kwargs)
 
 		#generate an empty table and fill it
 		tab = Table()
@@ -134,11 +134,11 @@ class csvBackend(BaseBackend):
 					i += 1
 				colName = '%s_%d' % (colName, i)
 
-			tab.add_column(colName, d[colName], 
-					unit = colUnit or '', 
+			tab.add_column(colName, d[colName.lower().replace('/','')],
+					unit = colUnit or '',
 					null = colNull or '',
-					description = colComm or '', 
-					format = colfmt, 
+					description = colComm or '',
+					format = colfmt,
 					dtype = d.dtype[k] )
 		#set aliases
 		for k in aliases:
@@ -147,19 +147,19 @@ class csvBackend(BaseBackend):
 		return tab
 
 	def writeHeader(self, unit, header, comment='#'):
-		""" Write File Header definition into the opened unit 
+		""" Write File Header definition into the opened unit
 		e.g. >>> self.writeHeader(unit, header, comment='#')
 			# NAME    tablename
-			# KEY     Value  
+			# KEY     Value
 		"""
 		keys = np.sort(header.keys())
 		for key in keys:
 			val = header[key]
 			for kval in str(val).split('\n'):
 				unit.write('%s %s\t%s\n' % (comment, key.upper(), kval) )
-	
+
 	def writeColHeader(self, unit, cols, comment='#'):
-		""" Write column description into opened buffer unit 
+		""" Write column description into opened buffer unit
 		e.g. >>> self.writeColHeader(unit, cols, comment='#')
 			## Column     Unit    Comment   Null    Fmt
 		"""
@@ -169,25 +169,25 @@ class csvBackend(BaseBackend):
 			hdr = cols[k]
 			txt = "%20s\t%10s\t%s\t%s\t%5s" % (k, hdr.unit, hdr.description, hdr.null, hdr.format)
 			unit.write('%s%s %s\n' % (comment, comment, txt) )
-	
+
 	def writeAliasesDef(self, unit, aliases, comment='#'):
 		""" Write aliases into the header
 		e.g. >>> self.writeAliasesDef(unit, aliases, comment='#')
-			# alias   col_alias=col1 
+			# alias   col_alias=col1
 		"""
 		for k,v in aliases.iteritems():
 			unit.write('%s alias\t%s=%s\n' % (comment, k,v) )
 
 
 	def writeColDef(self, unit, cols, delimiter = ',', comment = ''):
-		""" Write column definition into the opened unit 
+		""" Write column definition into the opened unit
 			This corresponds to the first line of the data for
 			standards compatibility
 		e.g. >>> self.writeColDef(unit, cols, comment='#')
 			#col1,col2,col3,col4,...,coln
 		"""
 		unit.write( comment + delimiter.join( cols.keys() ) + '\n' )
-	
+
 	def writeData(self, unit, data, fmt, delimiter=','):
 		""" Write data part into the opened unit """
 		size = data.shape[0]
@@ -195,14 +195,14 @@ class csvBackend(BaseBackend):
 			unit.write( fmt % data[ik].tolist() )
 			unit.write("\n")
 
-	def write(self, tab, output='exportedData.csv', header=True, 
+	def write(self, tab, output='exportedData.csv', header=True,
 		delimiter=',', comment='#', keep = False, verbose=False, **kwargs):
 		"""
 		export data to a comma separated value file
 
 		inputs:
 			data -- data dictionnary to export
-		
+
 		outputs:
 			output -- output file (def: exportedData.dat)
 
@@ -211,28 +211,28 @@ class csvBackend(BaseBackend):
 			delimiter -- delimiter to use (def: ',')
 			comment   -- comment character for header (def: '#')
 			keep      -- keeps unit opened
-			unit	  -- uses opened stream, if provided 
+			unit	  -- uses opened stream, if provided
 		"""
 
 		if hasattr(output, 'write'):
 			unit = output
 		else:
 			unit = open(output, 'w')
-		if header: 
-			self.writeHeader     ( unit , tab.header   , comment=comment                       ) 
-			self.writeColHeader  ( unit , tab.columns  , comment=comment                       ) 
-			self.writeAliasesDef ( unit , tab._aliases , comment=comment                       ) 
-			self.writeColDef     ( unit , tab.columns  , comment=''      , delimiter=delimiter ) 
+		if header:
+			self.writeHeader     ( unit , tab.header   , comment=comment                       )
+			self.writeColHeader  ( unit , tab.columns  , comment=comment                       )
+			self.writeAliasesDef ( unit , tab._aliases , comment=comment                       )
+			self.writeColDef     ( unit , tab.columns  , comment=''      , delimiter=delimiter )
 
 		fmt  = delimiter.join(['%'+tab.columns[k].format for k in tab.columns])
-		self.writeData( unit, tab.data[tab.keys()], fmt, delimiter=delimiter)	
+		self.writeData( unit, tab.data[tab.keys()], fmt, delimiter=delimiter)
 
 
 		if hasattr(output, 'write') or keep:
 			return unit
 		else:
 			unit.close()
-			
+
 #==============================================================================
 class asciiBackend(BaseBackend):
 #==============================================================================
@@ -320,7 +320,7 @@ class asciiBackend(BaseBackend):
 
 	def readData(self, filename, skiprows, *args, **kwargs):
 		""" returns the recarray of the data """
-		return np.recfromtxt(filename, skiprows=skiprows-1, *args, **kwargs) 
+		return np.recfromtxt(filename, skiprows=skiprows-1, *args, **kwargs)
 
 
 	def read(self, filename, delimiter=None, noheader=False, skiprows=0, comment='#', *args, **kwargs):
@@ -329,7 +329,7 @@ class asciiBackend(BaseBackend):
 		exportdata module.
 		So far it uses also the np.recfromtxt method
 		"""
-		
+
 		#Get header
 		nHeadLines, description, colInfo, header, aliases = self.readHeader(filename, comment, noheader, delimiter)
 
@@ -338,7 +338,7 @@ class asciiBackend(BaseBackend):
 			if not filename.closed:
 				filename.seek(0)
 		skip = skiprows+(nHeadLines-int(noheader))
-		d = self.readData(filename, skiprows=skip, names = header, *args, **kwargs) 
+		d = self.readData(filename, skiprows=skip, names = header, *args, **kwargs)
 
 		#generate an empty table and fill it
 		tab = Table()
@@ -358,11 +358,11 @@ class asciiBackend(BaseBackend):
 					i += 1
 				colName = '%s_%d' % (colName, i)
 
-			tab.add_column(colName, d[colName], 
-					unit = colUnit or '', 
+			tab.add_column(colName, d[colName.lower().replace('/','')],
+					unit = colUnit or '',
 					null = colNull or '',
-					description = colComm or '', 
-					format = colfmt, 
+					description = colComm or '',
+					format = colfmt,
 					dtype = d.dtype[k] )
 		#set aliases
 		for k in aliases:
@@ -371,19 +371,19 @@ class asciiBackend(BaseBackend):
 		return tab
 
 	def writeHeader(self, unit, header, comment='#'):
-		""" Write File Header definition into the opened unit 
+		""" Write File Header definition into the opened unit
 		e.g. >>> self.writeHeader(unit, header, comment='#')
 			# NAME    tablename
-			# KEY     Value  
+			# KEY     Value
 		"""
 		keys = np.sort(header.keys())
 		for key in keys:
 			val = header[key]
 			for kval in str(val).split('\n'):
 				unit.write('%s %s\t%s\n' % (comment, key.upper(), kval) )
-	
+
 	def writeColHeader(self, unit, cols, comment='#'):
-		""" Write column description into opened buffer unit 
+		""" Write column description into opened buffer unit
 		e.g. >>> self.writeColHeader(unit, cols, comment='#')
 			## Column     Unit    Comment   Null    Fmt
 		"""
@@ -393,25 +393,25 @@ class asciiBackend(BaseBackend):
 			hdr = cols[k]
 			txt = "%20s\t%10s\t%s\t%s\t%5s" % (k, hdr.unit, hdr.description, hdr.null, hdr.format)
 			unit.write('%s%s %s\n' % (comment, comment, txt) )
-	
+
 	def writeAliasesDef(self, unit, aliases, comment='#'):
 		""" Write aliases into the header
 		e.g. >>> self.writeAliasesDef(unit, aliases, comment='#')
-			# alias   col_alias=col1 
+			# alias   col_alias=col1
 		"""
 		for k,v in aliases.iteritems():
 			unit.write('%s alias\t%s=%s\n' % (comment, k,v) )
 
 
 	def writeColDef(self, unit, cols, delimiter = ',', comment = ''):
-		""" Write column definition into the opened unit 
+		""" Write column definition into the opened unit
 			This corresponds to the first line of the data for
 			standards compatibility
 		e.g. >>> self.writeColDef(unit, cols, comment='#')
 			#col1,col2,col3,col4,...,coln
 		"""
 		unit.write( comment + delimiter.join( cols.keys() ) + '\n' )
-	
+
 	def writeData(self, unit, data, fmt, delimiter=None):
 		""" Write data part into the opened unit """
 		size = data.shape[0]
@@ -419,14 +419,14 @@ class asciiBackend(BaseBackend):
 			unit.write( fmt % data[ik].tolist() )
 			unit.write("\n")
 
-	def write(self, tab, output='exportedData.txt', header=True, 
+	def write(self, tab, output='exportedData.txt', header=True,
 		delimiter=None, comment='#', verbose=False, keep=False, **kwargs):
 		"""
 		export data to a comma separated value file
 
 		inputs:
 			data -- data dictionnary to export
-		
+
 		outputs:
 			output -- output file (def: exportedData.dat)
 
@@ -435,7 +435,7 @@ class asciiBackend(BaseBackend):
 			delimiter -- delimiter to use (def: ',')
 			comment   -- comment character for header (def: '#')
 			keep      -- keeps unit opened
-			unit	  -- uses opened stream, if provided 
+			unit	  -- uses opened stream, if provided
 		"""
 		if delimiter is None:
 			delimiter = ' '
@@ -444,14 +444,14 @@ class asciiBackend(BaseBackend):
 			unit = output
 		else:
 			unit = open(output, 'w')
-		if header: 
-			self.writeHeader     ( unit , tab.header   , comment=comment                  ) 
-			self.writeColHeader  ( unit , tab.columns  , comment=comment                  ) 
-			self.writeAliasesDef ( unit , tab._aliases , comment=comment                  ) 
-			self.writeColDef     ( unit , tab.columns  , comment='#' , delimiter=delimiter) 
+		if header:
+			self.writeHeader     ( unit , tab.header   , comment=comment                  )
+			self.writeColHeader  ( unit , tab.columns  , comment=comment                  )
+			self.writeAliasesDef ( unit , tab._aliases , comment=comment                  )
+			self.writeColDef     ( unit , tab.columns  , comment='#' , delimiter=delimiter)
 
 		fmt  = delimiter.join(['%'+tab.columns[k].format for k in tab.columns])
-		self.writeData( unit, tab.data[tab.keys()], fmt, delimiter=delimiter)	
+		self.writeData( unit, tab.data[tab.keys()], fmt, delimiter=delimiter)
 
 
 		if hasattr(output, 'write') or keep:
