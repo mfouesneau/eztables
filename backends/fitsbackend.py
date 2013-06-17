@@ -166,11 +166,7 @@ class fitsBackend(BaseBackend):
                 units[i] = _unit
 
         #generate FITS table from a set of columns
-        cols = [ pyfits.Column( name=k, \
-                               array=tab[k],   \
-                               format=fmt[i],  \
-                               unit=units[i] ) \
-                for i, k in enumerate(keys)  ]
+        cols = [ pyfits.Column( name=k, array=tab[k],   format=fmt[i], unit=units[i] ) for i, k in enumerate(keys)  ]
 
         hdr = pyfits.new_table(cols)
 
