@@ -17,9 +17,8 @@ class TableHeader(object):
 
     def __setattr__(self, attribute, value):
         """ set attribute """
-        if (attribute.lower() in ['description', 'comment', 'history']) & \
-            (attribute in self):
-                self.__dict__[attribute] = self[attribute] + '\n' + value
+        if (attribute.lower() in ['description', 'comment', 'history']) & (attribute in self):
+                self.__dict__[attribute] = str(self[attribute]) + '\n' + str(value)
         else:
             self.__dict__[attribute] = value
 
