@@ -10,7 +10,10 @@ from ..core.tableheader import TableHeader
 from ..table import Table
 import json
 from json.encoder import *
-from collections import OrderedDict
+try:
+    from collections import OrderedDict
+except ImportError:
+    from ..core.odict import odict as OrderedDict
 
 
 ctypes = {      "S" : "string",

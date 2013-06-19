@@ -1,6 +1,9 @@
 """ Some helpers for sql related operations """
 from decorators import memoize
-from collections import OrderedDict
+try:
+    from collections import OrderedDict
+except ImportError:
+    from .odict import odict as OrderedDict
 import numpy as np
 import subprocess
 
@@ -34,12 +37,12 @@ type_dict[str] = "TEXT"
 class remotePsqlConfig(object):
 	""" Impose the conditions for the remote sql configuration """
 	def __init__(self, gate, gate_user, db_name, db_user, db_host, db_cmd, **kwargs):
-		self.gate        = gate     
+		self.gate        = gate
                 self.gate_user   = gate_user
-                self.db_name     = db_name  
-                self.db_user     = db_user  
-                self.db_host     = db_host  
-                self.db_cmd      = db_cmd   
+                self.db_name     = db_name
+                self.db_user     = db_user
+                self.db_host     = db_host
+                self.db_cmd      = db_cmd
 		for k,v in kwargs.iteritems():
 			self.__setattr__(k,v)
 
@@ -117,7 +120,7 @@ class remotePsql(object):
 		r = self.handle_special(txt, p)
 		return r
 
-	def __call__(self, q): 
+	def __call__(self, q):
 		"""
 		Execute the query q on the server and returns the associated
 		recarray
@@ -127,4 +130,4 @@ class remotePsql(object):
 		"""
 		return self.__res__(q)
 
-	__getitem__ = __call__ 
+	__getitem__ = __call__
