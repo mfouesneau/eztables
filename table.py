@@ -25,6 +25,45 @@ a table is
 
 __all__ = ['Table', 'ColumnHeader', 'TableHeader']
 
+
+def pretty_size_print(num_bytes):
+    """
+    Output number of bytes in a human readable format
+    """
+    if num_bytes is None:
+        return
+
+    KiB = 1024
+    MiB = KiB * KiB
+    GiB = KiB * MiB
+    TiB = KiB * GiB
+    PiB = KiB * TiB
+    EiB = KiB * PiB
+    ZiB = KiB * EiB
+    YiB = KiB * ZiB
+
+    if num_bytes > YiB:
+        output = '%.3g YB' % (num_bytes / YiB)
+    elif num_bytes > ZiB:
+        output = '%.3g ZB' % (num_bytes / ZiB)
+    elif num_bytes > EiB:
+        output = '%.3g EB' % (num_bytes / EiB)
+    elif num_bytes > PiB:
+        output = '%.3g PB' % (num_bytes / PiB)
+    elif num_bytes > TiB:
+        output = '%.3g TB' % (num_bytes / TiB)
+    elif num_bytes > GiB:
+        output = '%.3g GB' % (num_bytes / GiB)
+    elif num_bytes > MiB:
+        output = '%.3g MB' % (num_bytes / MiB)
+    elif num_bytes > KiB:
+        output = '%.3g KB' % (num_bytes / KiB)
+    else:
+        output = '%.3g Bytes' % (num_bytes)
+
+    return output
+
+
 #================================================================================
 class Table(object):
 	""" This class implements a Table object which aims at being able to
@@ -171,6 +210,12 @@ class Table(object):
 	@property
 	def shape(self):
 		return (self.nrows, self.ncols)
+
+	@property
+	def nbytes(self):
+		""" return the number of bytes of the object """
+		n = sum(k.nbytes if hasattr(k, 'nbytes') else sys.getsizeof(k) for k in self.__dict__.values())
+		return n
 
 	def __len__(self):
 		return self.nrows
@@ -614,8 +659,8 @@ class Table(object):
 		return self.__pretty_print__(ret=True)
 
 	def __repr__(self):
-		s = 'Table: %s,  nrows=%i, ncols=%i, ' % (self.header['NAME'], self.nrows, self.ncols)
-		s += object.__repr__(self)
+		s = object.__repr__(self)
+		s += '\nTable: %s\n,  nrows=%i, ncols=%i (%s)' % (self.header['NAME'], self.nrows, self.ncols, pretty_size_print(self.nbytes))
 		return s
 
 	def __getslice__(self, i,j):
