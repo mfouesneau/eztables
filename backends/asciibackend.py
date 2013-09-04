@@ -134,7 +134,7 @@ class csvBackend(BaseBackend):
                     i += 1
                 colName = '%s_%d' % (colName, i)
 
-            tab.add_column(colName, d[colName.lower().replace('/', '')],
+            tab.add_column(colName, d[colName.replace('/', '').replace('(', '').replace(')', '').replace("'", '')],
                     unit=colUnit or '',
                     null=colNull or '',
                     description=colComm or '',
@@ -359,7 +359,7 @@ class asciiBackend(BaseBackend):
                     i += 1
                 colName = '%s_%d' % (colName, i)
 
-            tab.add_column(colName, d[colName.lower().replace('/', '')],
+            tab.add_column(colName, d[colName.replace('/', '').replace('(', '').replace(')', '').replace("'", '')],
                     unit=colUnit or '',
                     null=colNull or '',
                     description=colComm or '',
