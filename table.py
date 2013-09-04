@@ -658,7 +658,7 @@ class Table(object):
 
     def __repr__(self):
         s = object.__repr__(self)
-        s += '\nTable: %s\n,  nrows=%i, ncols=%i (%s)' % (self.header['NAME'], self.nrows, self.ncols, pretty_size_print(self.nbytes))
+        s += '\nTable: %s,\n  nrows=%i, ncols=%i (%s)' % (self.header['NAME'], self.nrows, self.ncols, pretty_size_print(self.nbytes))
         return s
 
     def __getslice__(self, i,j):
