@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 import os
 import inspect
+import re
 localpath = '/'.join(os.path.abspath(inspect.getfile(inspect.currentframe())).split('/')[:-1])
 import numpy as np
 from .basebackend import BaseBackend
@@ -134,7 +135,7 @@ class csvBackend(BaseBackend):
                     i += 1
                 colName = '%s_%d' % (colName, i)
 
-            tab.add_column(colName, d[colName.replace('/', '').replace('(', '').replace(')', '').replace("'", '')],
+            tab.add_column(colName, d[ re.sub(r"[/().']", '', colName)],
                     unit=colUnit or '',
                     null=colNull or '',
                     description=colComm or '',
@@ -358,8 +359,7 @@ class asciiBackend(BaseBackend):
                 while '%s_%d' % (colName, i) in d.dtype.names:
                     i += 1
                 colName = '%s_%d' % (colName, i)
-
-            tab.add_column(colName, d[colName.replace('/', '').replace('(', '').replace(')', '').replace("'", '')],
+            tab.add_column(colName, d[ re.sub(r"[/().']", '', colName)],
                     unit=colUnit or '',
                     null=colNull or '',
                     description=colComm or '',
