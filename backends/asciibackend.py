@@ -275,7 +275,10 @@ class asciiBackend(BaseBackend):
                 if line[1] != comment:
                     #get table header
                     k = line[1:].split('\t')
-                    key = k[0].split()[0]  # remove trailing spaces
+                    if k[0] != '':
+                        key = k[0].split()[0]  # remove trailing spaces
+                    elif:
+                        key = k[1].split()[0]
                     #check aliases
                     if key[:5] != 'alias':
                         for cv in k[1:]:
