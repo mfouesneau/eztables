@@ -7,11 +7,13 @@ from .core.odict import odict
 from .core.helpers import *
 from .core.tableheader import TableHeader
 from .core.columnheader import ColumnHeader
-import operator, cStringIO
+import operator
+import cStringIO
 from numpy.lib import recfunctions
 from .registered_backends import *
 from copy import deepcopy
 from .core.decorators import warning
+import sys
 
 """
 Notes
