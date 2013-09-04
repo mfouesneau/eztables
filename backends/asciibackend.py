@@ -277,7 +277,7 @@ class asciiBackend(BaseBackend):
                     k = line[1:].split('\t')
                     if k[0] != '':
                         key = k[0].split()[0]  # remove trailing spaces
-                    elif:
+                    else:
                         key = k[1].split()[0]
                     #check aliases
                     if key[:5] != 'alias':
