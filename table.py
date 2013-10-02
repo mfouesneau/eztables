@@ -113,6 +113,7 @@ class Table(object):
             else:
                 self.read(*args, **kwargs)
         self.set_name( kwargs.get('name', None) )
+        self.caseless = kwargs.get('caseless', False)
 
     def read(self, filename, type=None, manager=None, silent=False, **kwargs):
         """ This function is a general function aiming at reading files.
@@ -172,7 +173,7 @@ class Table(object):
         """
         Set defaults from another Table obj
         """
-        for k,v in t.__dict__.iteritems():
+        for k, v in t.__dict__.iteritems():
             self.__setattr__(k, v)
 
     def __set_defaults__(self):
@@ -184,6 +185,7 @@ class Table(object):
         self._aliases     = dict()
         self.data         = None
         self._primary_key = None
+        self.caseless     = False
 
     def __call__(self, args=None):
         if args is None:
@@ -338,7 +340,7 @@ class Table(object):
         # User aliases
         assert colname in self.colnames
 
-        return tuple([ k for k,v in self._aliases.iteritems() if (v == colname) ])
+        return tuple([ k for k, v in self._aliases.iteritems() if (v == colname) ])
 
     def resolve_alias(self, colname):
         """
@@ -351,9 +353,14 @@ class Table(object):
         """
         # User aliases
         if hasattr(colname, '__iter__'):
-            return [ self._aliases.get(k,k) for k in colname ]
+            return [ self.resolve_alias(k) for k in colname ]
         else:
-            return self._aliases.get(colname, colname)
+            if self.caseless is True:
+                maps = dict( [ (k.lower(), v) for k, v in self._aliases.items() ] )
+                maps.update( (k.lower(), k) for k in self.keys() )
+                return maps.get(colname.lower(), colname)
+            else:
+                return self._aliases.get(colname, colname)
 
     def add_empty_column(self, name, dtype, unit='', null='', description='', format=None,
                          shape=None, before=None, after=None, position=None, col_hdr=None):
@@ -506,7 +513,7 @@ class Table(object):
         """
         assert( len(iterable) == self.ncols ), 'Expecting as many items as columns'
         r = self.empty_row
-        for k,v in enumerate(iterable):
+        for k, v in enumerate(iterable):
             r[0][k] = v
         self.stack(r)
 
@@ -603,10 +610,16 @@ class Table(object):
             return zip(idd, dup)
 
     def __getitem__(self, v):
-        return self.data.__getitem__(self.keys()).__getitem__(self.resolve_alias(v))
+        return np.asarray(self.data.__getitem__(self.resolve_alias(v)))
 
     def __setitem__(self, v):
-        return self.data.__getitem__(self.keys()).__setitem__(self.resolve_alias(v))
+        return self.data.__setitem__(self.resolve_alias(v))
+
+    def __getattr__(self, k):
+        try:
+            return object.__getattribute__(self, k)
+        except:
+            return self[k]
 
     def __pretty_print__(self, idx=None, fields=None, ret=False):
         """ Pretty print the table content
@@ -633,7 +646,7 @@ class Table(object):
                     rows += [ ['...' for k in range(len(fields)) ] ]
                 else:
                     rows += [ ['...' for k in range(len(fields)) ] ]
-                rows += [ [ str(self[k][rk]) for k in fields ] for rk in range(-5,0)]
+                rows += [ [ str(self[k][rk]) for k in fields ] for rk in range(-5, 0)]
         elif isinstance(idx, slice):
             _idx = range(idx.start, idx.stop, idx.step or 1)
             rows = [ [ str(self[k][rk]) for k in fields ] for rk in _idx]
@@ -661,8 +674,8 @@ class Table(object):
         s += '\nTable: %s,\n  nrows=%i, ncols=%i (%s)' % (self.header['NAME'], self.nrows, self.ncols, pretty_size_print(self.nbytes))
         return s
 
-    def __getslice__(self, i,j):
-        return self.data.__getslice__(i,j)
+    def __getslice__(self, i, j):
+        return self.data.__getslice__(i, j)
 
     def __contains__(self, k):
         return (k in self.keys()) or (k in self._aliases)
@@ -682,8 +695,8 @@ class Table(object):
         if self._aliases is not None:
             if len(self._aliases) > 0:
                 print "Table contains alias(es):"
-                for k,v in self._aliases.iteritems():
-                    print '\t %s --> %s' % (k,v)
+                for k, v in self._aliases.iteritems():
+                    print '\t %s --> %s' % (k, v)
                 print ''
         fields = 'columns unit format description'.split()
         row    = [ (k, self.columns[k].unit, self.columns[k].format, self.columns[k].description) for k in self.keys() ]
@@ -699,7 +712,7 @@ class Table(object):
             _globals[k] = self[k]
 
         if exprvars is not None:
-            assert(hasattr(exprvars, 'keys') & hasattr(exprvars, '__getitem__' )),"Expecting a dictionary-like as condvars"
+            assert(hasattr(exprvars, 'keys') & hasattr(exprvars, '__getitem__' )), "Expecting a dictionary-like as condvars"
             for k in ( exprvars.keys() ):
                 _globals[k] = self[k]
 
@@ -772,7 +785,7 @@ class Table(object):
 
 
 def __indent__(rows, hasHeader=False, hasUnits=False, headerChar='-', delim=' | ', justify='left',
-               separateRows=False, prefix='', postfix='', wrapfunc=lambda x:x):
+               separateRows=False, prefix='', postfix='', wrapfunc=lambda x: x):
     """Indents a table by column.
 
     INPUTS:
@@ -792,17 +805,17 @@ def __indent__(rows, hasHeader=False, hasUnits=False, headerChar='-', delim=' | 
     # closure for breaking logical rows to physical, using wrapfunc
     def rowWrapper(row):
         newRows = [wrapfunc(item).split('\n') for item in row]
-        return [[substr or '' for substr in item] for item in map(None,*newRows)]
+        return [[substr or '' for substr in item] for item in map(None, *newRows)]
     # break each logical row into one or more physical ones
     logicalRows = [rowWrapper(row) for row in rows]
     # columns of physical rows
-    columns = map(None,*reduce(operator.add,logicalRows))
+    columns = map(None, *reduce(operator.add, logicalRows))
     # get the maximum of each column by the string length of its items
     maxWidths = [max([len(str(item)) for item in column]) for column in columns]
     rowSeparator = headerChar * (len(prefix) + len(postfix) + sum(maxWidths) + len(delim) * (len(maxWidths) - 1))
 
     # select the appropriate justify method
-    justify = {'center':str.center, 'right':str.rjust, 'left':str.ljust}[justify.lower()]
+    justify = {'center': str.center, 'right': str.rjust, 'left': str.ljust}[justify.lower()]
     output = cStringIO.StringIO()
     if separateRows:
         print >> output, rowSeparator
@@ -810,7 +823,7 @@ def __indent__(rows, hasHeader=False, hasUnits=False, headerChar='-', delim=' | 
         for row in physicalRows:
             print >> output, \
                 prefix \
-                + delim.join([justify(str(item),width) for (item,width) in zip(row,maxWidths)]) \
+                + delim.join([justify(str(item), width) for (item, width) in zip(row, maxWidths)]) \
                 + postfix
         if separateRows:
             print >> output, rowSeparator
@@ -831,7 +844,7 @@ def from_dict(obj, **kwargs):
     assert( hasattr(obj, 'iteritems') ), "expecting obj has iteritem attribute (dict-like)"
 
     tab = Table()
-    for k,v in obj.iteritems():
+    for k, v in obj.iteritems():
             _v = np.asarray(v)
             tab.add_column( k, _v, dtype=_v.dtype )
     return tab
@@ -850,7 +863,7 @@ def from_ndArray(obj, **kwargs):
             tab.add_column( k, obj[k], dtype=obj.dtype[k] )
     else:
         for i in range(obj.shape[1]):
-            tab.add_column( 'f%d' % i, obj[:,i], dtype=obj.dtype )
+            tab.add_column( 'f%d' % i, obj[:, i], dtype=obj.dtype )
 
     return tab
 
