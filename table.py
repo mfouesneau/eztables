@@ -621,7 +621,10 @@ class Table(object):
         try:
             return object.__getattribute__(self, k)
         except:
-            return self[k]
+            try:
+                return self[k]
+            except:
+                raise NameError("name '{}' not defined".format(k))
 
     def __pretty_print__(self, idx=None, fields=None, ret=False):
         """ Pretty print the table content
