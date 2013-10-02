@@ -337,10 +337,11 @@ class Table(object):
         Given a colname, return a sequence of aliases associated to this column
         Aliases are defined by using .define_alias()
         """
+        _colname = self.resolve_alias(colname)
         # User aliases
-        assert colname in self.colnames
+        assert _colname in self.colnames
 
-        return tuple([ k for k, v in self._aliases.iteritems() if (v == colname) ])
+        return tuple([ k for k, v in self._aliases.iteritems() if (v == _colname) ])
 
     def resolve_alias(self, colname):
         """
@@ -575,11 +576,12 @@ class Table(object):
 
         _names = []
         for k in names:
-            if (k in self._aliases):
-                self._aliases.pop(k)
+            _k = self.resolve_alias(k)
+            if (_k in self._aliases):
+                self._aliases.pop(_k)
             else:
-                map(self._aliases.pop, self.reverse_alias(k))
-                _names.append(k)
+                map(self._aliases.pop, self.reverse_alias(_k))
+                _names.append(_k)
 
         p = [self.columns.pop(name) for name in _names]
         self.data = drop_fields(self.data, _names)
