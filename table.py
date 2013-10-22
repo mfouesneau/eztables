@@ -624,7 +624,7 @@ class Table(object):
             try:
                 return self[k]
             except:
-                return None
+                raise AttributeError('Attribute {} not found'.format(k))
 
     def __pretty_print__(self, idx=None, fields=None, ret=False):
         """ Pretty print the table content
