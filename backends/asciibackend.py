@@ -135,7 +135,7 @@ class csvBackend(BaseBackend):
                     i += 1
                 colName = '%s_%d' % (colName, i)
 
-            tab.add_column(colName, d[ re.sub(r"[/().']", '', colName)],
+            tab.add_column(colName, d[ re.sub(r"[/().']", '', colName.lower())],
                     unit=colUnit or '',
                     null=colNull or '',
                     description=colComm or '',
@@ -359,7 +359,7 @@ class asciiBackend(BaseBackend):
                 while '%s_%d' % (colName, i) in d.dtype.names:
                     i += 1
                 colName = '%s_%d' % (colName, i)
-            tab.add_column(colName, d[ re.sub(r"[/().']", '', colName)],
+            tab.add_column(colName, d[ re.sub(r"[/().']", '', colName.lower())],
                     unit=colUnit or '',
                     null=colNull or '',
                     description=colComm or '',
