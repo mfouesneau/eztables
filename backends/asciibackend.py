@@ -136,11 +136,11 @@ class csvBackend(BaseBackend):
                 colName = '%s_%d' % (colName, i)
 
             tab.add_column(colName, d[ re.sub(r"[/().']", '', colName.lower())],
-                    unit=colUnit or '',
-                    null=colNull or '',
-                    description=colComm or '',
-                    format=colfmt,
-                    dtype=d.dtype[k] )
+                           unit=colUnit or '',
+                           null=colNull or '',
+                           description=colComm or '',
+                           format=colfmt,
+                           dtype=d.dtype[k] )
         #set aliases
         for k in aliases:
             tab.set_alias(k[0], k[1])
@@ -323,7 +323,7 @@ class asciiBackend(BaseBackend):
 
     def readData(self, filename, skiprows, *args, **kwargs):
         """ returns the recarray of the data """
-        return np.recfromtxt(filename, skiprows=skiprows - 1, *args, **kwargs)
+        return np.recfromtxt(filename, skiprows=skiprows - 1, deletechars="[/().']", *args, **kwargs)
 
     def read(self, filename, delimiter=None, noheader=False, skiprows=0, comment='#', *args, **kwargs):
         """
@@ -359,12 +359,21 @@ class asciiBackend(BaseBackend):
                 while '%s_%d' % (colName, i) in d.dtype.names:
                     i += 1
                 colName = '%s_%d' % (colName, i)
-            tab.add_column(colName, d[ re.sub(r"[/().']", '', colName.lower())],
-                    unit=colUnit or '',
-                    null=colNull or '',
-                    description=colComm or '',
-                    format=colfmt,
-                    dtype=d.dtype[k] )
+            _key = re.sub(r"[/().']", '', colName)
+            if _key in d.dtype.names:
+                tab.add_column(colName, d[_key],
+                               unit=colUnit or '',
+                               null=colNull or '',
+                               description=colComm or '',
+                               format=colfmt,
+                               dtype=d.dtype[k] )
+            else:
+                tab.add_column(colName, d[ _key ],
+                               unit=colUnit or '',
+                               null=colNull or '',
+                               description=colComm or '',
+                               format=colfmt,
+                               dtype=d.dtype[k] )
         #set aliases
         for k in aliases:
             tab.set_alias(k[0], k[1])
