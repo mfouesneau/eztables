@@ -626,6 +626,12 @@ class Table(object):
             except:
                 raise AttributeError('Attribute {} not found'.format(k))
 
+    def __deepcopy__(self, memo):
+        return self
+
+    def __copy__(self, memo):
+        return self
+
     def __pretty_print__(self, idx=None, fields=None, ret=False):
         """ Pretty print the table content
             you can select the table parts to display using idx to
