@@ -218,9 +218,6 @@ class AstroTable(Table):
         if condition not in [True, 'True', None]:
             tab.header['COMMENT'] = 'SELECT %s FROM %s WHERE %s' % (fields, self.header['NAME'], str(condition) )
 
-        print cone, zone
-        print tab.header
-
         tab.setRA(self.ra_name)
         tab.setDEC(self.dec_name)
         return tab
