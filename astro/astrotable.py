@@ -1,6 +1,7 @@
 from . import astrohelpers
 from ..table import Table, __indent__
 import numpy as np
+from copy import deepcopy
 
 
 class AstroTable(Table):
@@ -105,53 +106,120 @@ class AstroTable(Table):
         dec0 = self.getDEC()
         return astrohelpers.conesearch(ra0, dec0, ra, dec, r, outtype=outtype)
 
-    def selectWhere(self, fields, condition=None, condvars=None, cone=None, **kwargs):
+    def zoneSearch(self, ramin, ramax, decmin, decmax, outtype=0):
+        """ Perform a zone search on a table, i.e., a rectangular selection
+        INPUTS:
+            ra0 	ndarray[ndim=1, dtype=float]	column name to use as RA source in degrees
+            dec0	ndarray[ndim=1, dtype=float]	column name to use as DEC source in degrees
+            ra		float                       	ra to look for (in degree)
+            dec		float	                        ra to look for (in degree)
+            r		float		                    distance in degrees
+        KEYWORDS:
+            outtype int                             0 -- minimal, indices of matching coordinates
+                                                    1 -- indices and distances of matching coordinates
+                                                    2 -- full, boolean filter and distances
+        """
+
+        assert( (self.ra_name is not None) & (self.dec_name is not None) ), 'Coordinate columns not set.'
+
+        ra0  = self.getRA()
+        dec0 = self.getDEC()
+        ind = (ra0 >= ramin) & (ra0 <= ramax) & (dec0 >= decmin) & (dec0 <= decmax)
+        if outtype <= 2:
+            return ind
+        else:
+            return np.where(ind)
+
+    def selectWhere(self, fields, condition=None, condvars=None, cone=None, zone=None, **kwargs):
         """ Read table data fulfilling the given `condition`.
             Only the rows fulfilling the `condition` are included in the result.
-            conesearch is also possible trhough the keyword cone formatted as (ra, dec, r)
+            conesearch is also possible through the keyword cone formatted as (ra, dec, r)
+            zonesearch is also possible through the keyword zone formatted as (ramin, ramax, decmin, decmax)
+
+            Combination of multiple selections is also available.
         """
-        if (condition is None) & (cone is None):
-            tab = self.__class__(self)
-
         if cone is not None:
-            assert(len(cone) == 3), 'Expecting cone keywords as a triplet (ra, dec, r)'
+            if len(cone) != 3:
+                raise ValueError('Expecting cone keywords as a triplet (ra, dec, r)')
+        if zone is not None:
+            if len(zone) != 4:
+                raise ValueError('Expecting zone keywords as a tuple of 4 elements (ramin, ramax, decmin, decmax)')
 
-        if condition is not None:
-            tab = super(self.__class__, self).selectWhere(fields, condition, condvars, **kwargs)
+        # only a cone search
+        # make a copy without the data itself (memory gentle)
+        tab = self.__class__()
+        for k in self.__dict__.keys():
+            if k != 'data':
+                setattr(tab, k, deepcopy(self.__dict__[k]))
+        if (condition is None) & (cone is None):
+            tab.data = deepcopy(self.data)
+
+        if fields.count(',') > 0:
+            _fields = fields.split(',')
+        elif fields.count(' ') > 0:
+            _fields = fields.split()
+        else:
+            _fields = fields
+
+        if (condition in [True, 'True', None]):
+            if (cone is None) & (zone is None):
+                ind = None
+            elif (cone is not None) & (zone is None):
+                ra, dec, r = cone
+                ind, d = self.coneSearch(ra, dec, r, outtype=1)
+            elif (cone is None) & (zone is not None):
+                ind = self.zoneSearch(zone[0], zone[1], zone[2], zone[3], outtype=1)
+            else:  # cone + zone
+                ra, dec, r = cone
+                ind, d = self.coneSearch(ra, dec, r, outtype=2)
+                ind = ind & self.zoneSearch(zone[0], zone[1], zone[2], zone[3], outtype=2)
+                d = d[ind]
+                ind = np.where(ind)
+        else:
+            if condvars is None:
+                condvars = {}
+            condi = '({0:s})'.format(condition)
             if cone is not None:
                 ra, dec, r = cone
-                b, d = tab.coneSearch(ra, dec, r, outtype=1)
-                tab.data = tab.data[b]
-                tab.add_column('separation', np.asarray(d), unit='degree')
-                tab.header['COMMENT'] = 'SELECT %s FROM %s WHERE %s' % (fields, self.header['NAME'], 'distance from (%0.3f, %0.3f) <= %0.3f' % (ra, dec, r) )
+                cind, d = self.coneSearch(ra, dec, r, outtype=2)
+                d = d[cind]
+                condvars['_cone_'] = cind
+                condi += ' & (_cone_)'
+            if zone is not None:
+                zind = self.zoneSearch(zone[0], zone[1], zone[2], zone[3], outtype=2)
+                condvars['_zone_'] = zind
+                condi += ' & (_zone_)'
+            ind = self.where(condi, condvars=condvars, **kwargs)
 
+        if _fields == '*':
+            if ind is not None:
+                tab.data = self.data[ind]
+            else:
+                tab.data = deepcopy(self.data)
         else:
-            # only a cone search
-            ra, dec, r = cone
-            tab = self.__class__(self)
-            ind, d = tab.coneSearch(ra, dec, r, outtype=1)
-
-            if fields.count(',') > 0:
-                _fields = fields.split(',')
-            elif fields.count(' ') > 0:
-                _fields = fields.split(' ')
+            if ind is not None:
+                tab.data = self.data[tab.resolve_alias(_fields)][ind]
             else:
-                _fields = fields
-            if _fields == '*':
-                tab.data = tab.data[ind]
-            else:
-                tab.data = tab.data[tab.resolve_alias(_fields)][ind]
-                names = tab.data.dtype.names
-                #cleanup aliases and columns
-                for k in self.keys():
-                    if k not in names:
-                        al = self.reverse_alias(k)
-                        for alk in al:
-                            self.delCol(alk)
-                        tab.columns.pop(k)
-
+                tab.data = self.data[tab.resolve_alias(_fields)]
+            names = tab.data.dtype.names
+            #cleanup aliases and columns
+            for k in self.keys():
+                if k not in names:
+                    al = self.reverse_alias(k)
+                    for alk in al:
+                        tab.delCol(alk)
+                    if k in tab.keys():
+                        tab.delCol(k)
+        if cone is not None:
             tab.add_column('separation', np.asarray(d), unit='degree')
             tab.header['COMMENT'] = 'SELECT %s FROM %s WHERE %s' % (fields, self.header['NAME'], 'distance from (%0.3f, %0.3f) <= %0.3f' % (ra, dec, r) )
+        if zone is not None:
+            tab.header['COMMENT'] = 'SELECT %s FROM %s WHERE %s' % (fields, self.header['NAME'], 'coordinates inside box(%0.3f, %0.3f, %0.3f, %0.3f)' % (zone[0], zone[1], zone[2], zone[3]) )
+        if condition not in [True, 'True', None]:
+            tab.header['COMMENT'] = 'SELECT %s FROM %s WHERE %s' % (fields, self.header['NAME'], str(condition) )
+
+        print cone, zone
+        print tab.header
 
         tab.setRA(self.ra_name)
         tab.setDEC(self.dec_name)
