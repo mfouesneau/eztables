@@ -627,7 +627,7 @@ class Table(object):
                 raise AttributeError('Attribute {} not found'.format(k))
 
     def __deepcopy__(self, memo):
-        return self
+        return copyTable(self)
 
     def __copy__(self, memo):
         return self
@@ -724,8 +724,8 @@ class Table(object):
 
         if exprvars is not None:
             assert(hasattr(exprvars, 'keys') & hasattr(exprvars, '__getitem__' )), "Expecting a dictionary-like as condvars"
-            for k in ( exprvars.keys() ):
-                _globals[k] = self[k]
+            for k, v in ( exprvars.items() ):
+                _globals[k] = v
 
         # evaluate expression, to obtain the final filter
         r    = np.empty( self.nrows, dtype=dtype)
@@ -751,26 +751,43 @@ class Table(object):
         """ Read table data fulfilling the given `condition`.
             Only the rows fulfilling the `condition` are included in the result.
         """
-        ind = self.where(condition, condvars, **kwargs)
-        tab = from_Table(self)
+        # make a copy without the data itself (memory gentle)
+        tab = self.__class__()
+        for k in self.__dict__.keys():
+            if k != 'data':
+                setattr(tab, k, deepcopy(self.__dict__[k]))
+
         if fields.count(',') > 0:
             _fields = fields.split(',')
         elif fields.count(' ') > 0:
-            _fields = fields.split(' ')
+            _fields = fields.split()
         else:
             _fields = fields
-        if _fields == '*':
-            tab.data = tab.data[ind]
+
+        if condition in [True, 'True', None]:
+            ind = None
         else:
-            tab.data = tab.data[tab.resolve_alias(_fields)][ind]
+            ind = self.where(condition, condvars, **kwargs)
+
+        if _fields == '*':
+            if ind is not None:
+                tab.data = self.data[ind]
+            else:
+                tab.data = deepcopy(self.data)
+        else:
+            if ind is not None:
+                tab.data = self.data[tab.resolve_alias(_fields)][ind]
+            else:
+                tab.data = self.data[tab.resolve_alias(_fields)]
             names = tab.data.dtype.names
             #cleanup aliases and columns
             for k in self.keys():
                 if k not in names:
                     al = self.reverse_alias(k)
                     for alk in al:
-                        self.delCol(alk)
-                    tab.columns.pop(k)
+                        tab.delCol(alk)
+                    if k in tab.keys():
+                        tab.delCol(k)
 
         tab.header['COMMENT'] = 'SELECT %s FROM %s WHERE %s' % (','.join(_fields), self.header['NAME'], condition)
         return tab
@@ -884,14 +901,17 @@ def from_Table(obj, **kwargs):
     """ Generate a new table fr om a Table obj """
 #==============================================================================
     assert( isinstance(obj, Table)), "Expecting Table object, got %s" % type(obj)
-    return deepcopy(obj)
+    return copyTable(obj)
 
 
 #==============================================================================
-def copyTable(tab, **kwargs):
+def copyTable(obj, **kwargs):
     """ Copy a Table """
 #==============================================================================
-    return deepcopy(tab)
+    t = obj.__class__()
+    for k in obj.__dict__.keys():
+        setattr(t, k, deepcopy(obj.__dict__[k]))
+    return (t)
 
 
 @warning(message='Deprecated function. Use Table class constructor instead.')
