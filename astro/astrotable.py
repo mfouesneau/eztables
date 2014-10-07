@@ -49,9 +49,9 @@ class AstroTable(Table):
         if (not degree) or (self.dtype[self.ra_name].kind != 'S'):
             return self[self.ra_name]
         else:
-            if (len(self[0][self.ra_name].split(':')) == 3):
+            if (len(str(self[0][self.ra_name]).split(':')) == 3):
                 return np.asarray(astrohelpers.hms2deg(self[self.ra_name], delim=':'))
-            elif (len(self[0][self.ra_name].split(' ')) == 3):
+            elif (len(str(self[0][self.ra_name]).split(' ')) == 3):
                 return np.asarray(astrohelpers.hms2deg(self[self.ra_name], delim=' '))
             else:
                 raise Exception('RA Format not understood')
@@ -63,9 +63,9 @@ class AstroTable(Table):
         if (not degree) or (self.dtype[self.dec_name].kind != 'S'):
             return self[self.dec_name]
         else:
-            if (len(self[0][self.dec_name].split(':')) == 3):
+            if (len(str(self[0][self.dec_name]).split(':')) == 3):
                 return np.asarray(astrohelpers.dms2deg(self[self.dec_name], delim=':'))
-            elif (len(self[0][self.dec_name].split(' ')) == 3):
+            elif (len(str(self[0][self.dec_name]).split(' ')) == 3):
                 return np.asarray(astrohelpers.dms2deg(self[self.dec_name], delim=' '))
             else:
                 raise Exception('RA Format not understood')

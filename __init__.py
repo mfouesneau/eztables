@@ -1,4 +1,4 @@
-from table import *
+from tables import *
 from astro import AstroTable
 __version__ = '1.0'
 __author__  = 'MF'
