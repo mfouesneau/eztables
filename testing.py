@@ -1,4 +1,4 @@
-import table
+from . import table
 import numpy as np
 from StringIO import StringIO
 

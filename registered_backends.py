@@ -1,4 +1,4 @@
-from backends.basebackend import BaseBackend
+from .backends.basebackend import BaseBackend
 
 __all__ = ['register_extension', 'determine_type']
 
