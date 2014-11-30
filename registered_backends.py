@@ -37,11 +37,17 @@ def register_extension(extensions, backend=None, readerFunction=None,
         assert((readerFunction is not None) & (writerFunction is not None)), "read/write functions required"
         backend = BaseBackend(extensions[0], readerFunction, writerFunction  )
 
-    for k in extensions:
-        if (k not in __extensions__) or override:
-            __extensions__[k] = backend
+    if type(extensions) in (str, ):
+        if (extensions not in __extensions__) or override:
+            __extensions__[extensions] = backend
         else:
-            raise Exception("Type %s is already defined" % k)
+            raise Exception("Type %s is already defined" % extensions)
+    else:
+        for k in extensions:
+            if (k not in __extensions__) or override:
+                __extensions__[k] = backend
+            else:
+                raise Exception("Type %s is already defined" % k)
 
 
 def determine_type(string, verbose=True):
