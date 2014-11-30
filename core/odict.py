@@ -6,7 +6,12 @@ __author__ = 'MF'
 __version__ = '1.0'
 
 
-__strtypes__ = [str, unicode]
+import sys
+
+if sys.version_info[0] > 2:
+    __strtypes__ = [str]
+else:
+    __strtypes__ = [str, unicode]
 
 # Add Numpy str type if possible
 try:
@@ -52,7 +57,7 @@ class odict(object):
         if type(key) == int:
             return self.__values__[key]
         elif type(key) in __strtypes__:
-            if not key in self.__keys__:
+            if key not in self.__keys__:
                 raise KeyError
             index = self.__keys__.index(key)
             return self.__values__[index]
@@ -73,7 +78,7 @@ class odict(object):
 
     def pop(self, key):
         """remove specified key and return the corresponding value."""
-        if not key in self.__keys__:
+        if key not in self.__keys__:
             raise KeyError
         index = self.__keys__.index(key)
         self.__keys__.pop(index)
@@ -84,14 +89,14 @@ class odict(object):
 
     def move(self, key, position):
         """ Move a key-value position """
-        if not key in self.__keys__:
+        if key not in self.__keys__:
             raise KeyError
         v = self.pop(key)
         self.insert(position, key, v)
 
     def rename(self, oldkey, newkey):
         """ Rename a key """
-        if not oldkey in self.__keys__:
+        if oldkey not in self.__keys__:
             raise KeyError
         index = self.__keys__.index(oldkey)
         self.__keys__[index] = newkey
