@@ -1,2 +1,2 @@
 from .astrotable import AstroTable
-import .astrohelpers as tools
+from . import astrohelpers as tools
