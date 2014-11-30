@@ -8,7 +8,7 @@ from .core.helpers import *
 from .core.tableheader import TableHeader
 from .core.columnheader import ColumnHeader
 import operator
-import cStringIO
+from .core.compatibility import StringIO
 from numpy.lib import recfunctions
 from .registered_backends import *
 from copy import deepcopy
@@ -66,7 +66,7 @@ def pretty_size_print(num_bytes):
     return output
 
 
-#================================================================================
+# ===============================================================================
 class Table(object):
     """ This class implements a Table object which aims at being able to
     manage dataset table independently of its storage format.
@@ -84,7 +84,7 @@ class Table(object):
     apart using TableManager objects that are then registered with the
     "register_extension" function.
     """
-#================================================================================
+# ===============================================================================
     def __init__(self, *args, **kwargs):
         """
         Create a table instance
@@ -294,7 +294,7 @@ class Table(object):
           duplicates...
 
         """
-        #TODO: return a Table by default
+        # TODO: return a Table by default
         if asTable:
             asrecarray = True
         arr = recfunctions.join_by(key, self, r2, jointype=jointype,
@@ -664,10 +664,10 @@ class Table(object):
         else:
             rows = [ [ str(self[k][rk]) for k in fields ] for rk in idx]
         units = [ '(' + str( self.columns[k].unit or '') + ')' for k in fields ]
-        #fmt   = [ '%' + self.columns[k].format for k in self.keys() ]
+        # fmt   = [ '%' + self.columns[k].format for k in self.keys() ]
 
-        #if nfields == 1:
-        #   fields = [fields]
+        # if nfields == 1:
+        #    fields = [fields]
         if (''.join(units) == ''.join(['()'] * len(fields)) ):
             out = __indent__([fields] + rows, hasHeader=True, hasUnits=False)
         else:
@@ -780,7 +780,7 @@ class Table(object):
             else:
                 tab.data = self.data[tab.resolve_alias(_fields)]
             names = tab.data.dtype.names
-            #cleanup aliases and columns
+            # cleanup aliases and columns
             for k in self.keys():
                 if k not in names:
                     al = self.reverse_alias(k)
@@ -844,7 +844,7 @@ def __indent__(rows, hasHeader=False, hasUnits=False, headerChar='-', delim=' | 
 
     # select the appropriate justify method
     justify = {'center': str.center, 'right': str.rjust, 'left': str.ljust}[justify.lower()]
-    output = cStringIO.StringIO()
+    output = StringIO()
     if separateRows:
         print >> output, rowSeparator
     for physicalRows in logicalRows:
@@ -865,10 +865,10 @@ def __indent__(rows, hasHeader=False, hasUnits=False, headerChar='-', delim=' | 
     return output.getvalue()
 
 
-#==============================================================================
+# =============================================================================
 def from_dict(obj, **kwargs):
     """ Generate a table from a recArray or numpy array """
-#==============================================================================
+# =============================================================================
     assert( hasattr(obj, 'iteritems') ), "expecting obj has iteritem attribute (dict-like)"
 
     tab = Table()
@@ -878,10 +878,10 @@ def from_dict(obj, **kwargs):
     return tab
 
 
-#==============================================================================
+# =============================================================================
 def from_ndArray(obj, **kwargs):
     """ Generate a table from a recArray or numpy array """
-#==============================================================================
+# =============================================================================
     supported_types = [ np.core.records.recarray, np.ndarray ]
     assert( type(obj) in supported_types ), "expecting recArray, got %s " % type(obj)
     tab = Table()
@@ -896,18 +896,18 @@ def from_ndArray(obj, **kwargs):
     return tab
 
 
-#==============================================================================
+# =============================================================================
 def from_Table(obj, **kwargs):
     """ Generate a new table fr om a Table obj """
-#==============================================================================
+# =============================================================================
     assert( isinstance(obj, Table)), "Expecting Table object, got %s" % type(obj)
     return copyTable(obj)
 
 
-#==============================================================================
+# =============================================================================
 def copyTable(obj, **kwargs):
     """ Copy a Table """
-#==============================================================================
+# =============================================================================
     t = obj.__class__()
     for k in obj.__dict__.keys():
         setattr(t, k, deepcopy(obj.__dict__[k]))
