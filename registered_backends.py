@@ -1,3 +1,4 @@
+from __future__ import print_function
 from .backends.basebackend import BaseBackend
 
 __all__ = ['register_extension', 'determine_type']
@@ -5,9 +6,9 @@ __all__ = ['register_extension', 'determine_type']
 global __extensions__
 __extensions__ = {}
 
-#==============================================================================
+# =============================================================================
 # COMMON functions
-#==============================================================================
+# =============================================================================
 
 
 def register_extension(extensions, backend=None, readerFunction=None,
@@ -32,14 +33,12 @@ def register_extension(extensions, backend=None, readerFunction=None,
     if not hasattr(extensions, '__iter__'):
         extensions = [extensions]
 
-    #if backend is not None:
-    #   assert(isNestedInstance(backend, basebackend.BaseBackend)), "backend is expected to be a core.basebackend.BaseBackend instance"
     if backend is None:
         assert((readerFunction is not None) & (writerFunction is not None)), "read/write functions required"
         backend = BaseBackend(extensions[0], readerFunction, writerFunction  )
 
     for k in extensions:
-        if (not k in __extensions__) or override:
+        if (k not in __extensions__) or override:
             __extensions__[k] = backend
         else:
             raise Exception("Type %s is already defined" % k)
@@ -57,7 +56,7 @@ def determine_type(string, verbose=True):
         set_defaults()
 
     s = string.lower()
-    if not '.' in s:
+    if '.' not in s:
         extension = s
     else:
         extension = s.split('.')[-1]
@@ -71,7 +70,7 @@ def determine_type(string, verbose=True):
     if extension in __extensions__:
         tableType = __extensions__[extension]
         if verbose:
-            print "Auto-detected type: %s" % extension
+            print("Auto-detected type: %s" % extension)
     else:
             raise Exception('Could not determine input type for extension %s' % extension)
     return tableType
