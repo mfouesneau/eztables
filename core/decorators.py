@@ -1,4 +1,5 @@
 """ Some useful decorators """
+from __future__ import print_function
 
 import time
 import math
@@ -32,7 +33,7 @@ class timeit(object):
     """
     def __init__(self, f=None, verbose=True, text=None):
         self.f = f
-        if not self.f is None:
+        if self.f is not None:
             if type(self.f) != str:
                 functools.update_wrapper(self, f)
                 self.text = self.__name__
@@ -44,12 +45,12 @@ class timeit(object):
         self.verbose = verbose
 
     def __enter__(self):
-        print "Timing %s" % (self.text)
+        print("Timing %s" % (self.text))
         self.start = time.time()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.stop = time.time()
-        print self.time
+        print(self.time)
 
     def __pretty_print(self, t):
         units = [u"s", u"ms", u'us', "ns"]
@@ -72,7 +73,7 @@ class timeit(object):
         r = self.f(*args, **kwargs)
         self.stop = time.time()
         if self.verbose:
-            print self.time
+            print(self.time)
         return r
 
 
@@ -141,8 +142,8 @@ def deprecated(message=None, stacklevel=2):
     def deco(func):
         @wraps(func)
         def new_func(*args, **kwargs):
-            warnings.warn("Call to deprecated function {}. {}".format(func.__name__, message or ''),
-                        category=DeprecationWarning, stacklevel=stacklevel)
+            warnings.warn("Call to deprecated function {}.  {}".format(func.__name__, message or ''),
+                          category=DeprecationWarning, stacklevel=stacklevel)
             return func(*args, **kwargs)
         return new_func
     return deco
@@ -170,7 +171,7 @@ def warning(message=None, category=UserWarning, stacklevel=2):
         @wraps(func)
         def new_func(*args, **kwargs):
             warnings.warn("Call to function {}. {}".format(func.__name__, message or ''),
-                        category=category, stacklevel=stacklevel)
+                          category=category, stacklevel=stacklevel)
             return func(*args, **kwargs)
         return new_func
     return deco
