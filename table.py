@@ -1,7 +1,7 @@
 """
 This module contains the base of any table regardless of their storage
 """
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 import numpy as np
 from .core.odict import odict
 from .core.helpers import *
@@ -675,7 +675,7 @@ class Table(object):
         if ret is True:
             return out
         else:
-            print out
+            print(out)
 
     def __str__(self):
         return self.__pretty_print__(ret=True)
@@ -701,18 +701,18 @@ class Table(object):
         return self.data.itervalues()
 
     def info(self):
-        print self.header
-        print "Table contains: %i row(s) in %i column(s)\n" % (self.nrows, self.ncols)
+        print(self.header)
+        print("Table contains: %i row(s) in %i column(s)\n" % (self.nrows, self.ncols))
         if self._aliases is not None:
             if len(self._aliases) > 0:
-                print "Table contains alias(es):"
+                print("Table contains alias(es):")
                 for k, v in self._aliases.iteritems():
-                    print '\t %s --> %s' % (k, v)
-                print ''
+                    print('\t %s --> %s' % (k, v))
+                print('')
         fields = 'columns unit format description'.split()
         row    = [ (k, self.columns[k].unit, self.columns[k].format, self.columns[k].description) for k in self.keys() ]
         out    = __indent__([fields] + row, hasHeader=True, hasUnits=False, delim=' ')
-        print out
+        print(out)
 
     def evalexpr(self, expr, exprvars=None, start=None, stop=None, step=None, dtype=float):
         """ evaluate expression based on the data and external variables
