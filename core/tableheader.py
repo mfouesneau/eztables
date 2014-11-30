@@ -1,3 +1,4 @@
+from .compatibility import iteritems, itervalues, iterkeys
 import numpy as np
 
 
@@ -10,7 +11,7 @@ class TableHeader(object):
         for k, v in kwargs:
             self.__setattr__(k, v)
         if (isinstance(dic, dict)) or (isinstance(dic, TableHeader)):
-            for k, v in dic.iteritems():
+            for k, v in iteritems(dic):
                 self.__setattr__(k, v)
         if not 'NAME' in kwargs:
             self.__setattr__('NAME', 'Noname')
@@ -72,13 +73,13 @@ class TableHeader(object):
         return self.__dict__.__iter__()
 
     def iterkeys(self):
-        return self.__dict__.iterkeys()
+        return iterkeys(self.__dict__)
 
     def itervalues(self):
-        return self.__dict__.itervalues()
+        return itervalues(self.__dict__)
 
     def iteritems(self):
-        return self.__dict__.iteritems()
+        return iteritems(self.__dict__)
 
     def items(self):
         return self.__dict__.items()
