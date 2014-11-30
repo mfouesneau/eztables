@@ -1,7 +1,10 @@
 """ sqllite, mysql, psql """
-from __future__ import absolute_import
-import os, inspect, sys
+from __future__ import absolute_import, print_function
+import os
+import inspect
+import sys
 localpath = '/'.join(os.path.abspath(inspect.getfile(inspect.currentframe())).split('/')[:-1])
+import numpy as np
 
 from .basebackend import BaseBackend
 #from ..core.tableheader import TableHeader

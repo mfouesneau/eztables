@@ -1,6 +1,6 @@
 """ Backend for HDF5 format based on (py)tables """
 
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 import os
 import inspect
 localpath = '/'.join(os.path.abspath(inspect.getfile(inspect.currentframe())).split('/')[:-1])
@@ -119,14 +119,14 @@ class hdf5Backend(BaseBackend):
                 t = self.__createTable__(hd5, tab, group, tablename)
             except:
                 if not silent:
-                    print "Warning: Table creation exception. Table may already exist."
+                    print("Warning: Table creation exception. Table may already exist.")
                 t = hd5.getNode(group + tablename)
         else:
             try:
                 t = hd5.getNode(group + tablename)
             except tables.NoSuchNodeError:
                 if not silent:
-                    print "Warning: Table does not exists.  New table will be created"
+                    print("Warning: Table does not exists.  New table will be created")
                 t = self.__createTable__(hd5, tab, group, tablename)
         #fill the table
         t.append( tab.data.astype(t.description._v_dtype) )
@@ -155,7 +155,7 @@ class hdf5Backend(BaseBackend):
         for i, (k, v) in enumerate(tab._aliases.items()):
             t.attrs['ALIAS%d' % i ] = '%s=%s' % (k, v)
 
-        print hd5
+        print(hd5)
         hd5.close()
 
     def readColDesc(self, tab, name):
@@ -184,7 +184,7 @@ class hdf5Backend(BaseBackend):
                 tableName = '/' + tableName
             node = source.getNode(tableName)
         if silent is True:
-            print "\tLoading table: %s" % tableName
+            print("\tLoading table: %s" % tableName)
 
         #read data
         data = node[:]

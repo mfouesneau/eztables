@@ -5,14 +5,14 @@ The registery of backends is located in backends/__init__.py
 """
 
 #==============================================================================
-class BaseBackend(object): 
+class BaseBackend(object):
 	""" Template class for managing access to table files
 		The aim of this class is to propose various format managers by
 		simply providing reading and writing methods
 
 		Define any format manager by deriving this class and defining
 		the two followin method:
-		
+
 		read  -- reading from the considered format
 		write -- export to the considered format
 
@@ -29,7 +29,7 @@ class BaseBackend(object):
 		if writerFunction:
 			del self.write
 			self.write = writerFunction
-	
+
 	def read(self,*args, **kwargs):
 		""" to be overwritten """
 		pass

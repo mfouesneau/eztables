@@ -31,6 +31,7 @@ VO Format descriptions
 .. _VALUES: http://www.ivoa.net/Documents/REC/VOTable/VOTable-20040811.html#ToC30
 .. _VOTABLE: http://www.ivoa.net/Documents/PR/VOTable/VOTable-20040322.html#ToC9
 """
+from __future__ import print_function
 
 from xml.dom import minidom
 import numpy as np
@@ -206,7 +207,7 @@ def votable(obj):
     colunits  = [ str(v.attributes.get('unit')) for v in cols ]
     coldescs  = [ v.DESCRIPTION.text for v in cols if 'DESCRIPTION' in v.childrenNames ]
     for e, ktype in enumerate(coltypes):
-            #the width on decimals needs to be odd, and does not matter on strings
+            # the width on decimals needs to be odd, and does not matter on strings
             if ktype in ['char', 'str', 'string']:
                 coltypes[e] = '|S%d' % colwidths[e]
             else:

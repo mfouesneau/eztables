@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 import os
 import inspect
 import re
@@ -8,14 +8,13 @@ from .basebackend import BaseBackend
 from ..core.tableheader import TableHeader
 from ..table import Table
 
-#==============================================================================
+# =============================================================================
 # ASCII/CSV TABLE MANAGERS
-#==============================================================================
+# =============================================================================
 
 
-#==============================================================================
+# =============================================================================
 class csvBackend(BaseBackend):
-#==============================================================================
     def __init__(self):
         """ constructor """
         BaseBackend.__init__(self, tableType='csv')
@@ -40,10 +39,10 @@ class csvBackend(BaseBackend):
         else:
             stream = open(filename, 'r')
 
-        #get emtpy header
+        # get emtpy header
         description = TableHeader()
 
-        #ColumnHeader(dtype, unit=None, description=None, null=None, format=None, aliases=None)
+        # ColumnHeader(dtype, unit=None, description=None, null=None, format=None, aliases=None)
         colInfo = {}
         aliases = []
         nHeadLines = 0
@@ -53,17 +52,17 @@ class csvBackend(BaseBackend):
             nHeadLines += 1
             if line[0] == comment:
                 if line[1] != comment:
-                    #get table header
+                    # get table header
                     k = line[1:].split('\t')
                     key = k[0].split()[0]  # remove trailing spaces
-                    #check aliases
+                    # check aliases
                     if key[:5] != 'alias':
                         for cv in k[1:]:
                             description[key] = cv
                     else:
                         aliases.append(k[1].split('='))
                 else:
-                    #get columns meta
+                    # get columns meta
                     k = line[2:].split('\t')
                     colName = k[0].split()[0]
                     if len(k) > 1:
@@ -92,7 +91,7 @@ class csvBackend(BaseBackend):
         if not hasattr(filename, 'read'):
             stream.close()
 
-        if not 'NAME' in description.keys():
+        if 'NAME' not in description.keys():
             description['NAME'] = filename.split('/')[-1]
         return nHeadLines, description, colInfo, header, aliases
 
@@ -106,22 +105,21 @@ class csvBackend(BaseBackend):
         exportdata module.
         So far it uses also the np.recfromcsv method
         """
-
-        #Get header
+        # Get header
         nHeadLines, description, colInfo, header, aliases = self.readHeader(filename, comment, noheader, delimiter)
 
-        #get data
+        # get data
         if hasattr(filename, 'read'):
             if not filename.closed:
                 filename.seek(0)
         skip = skiprows + (nHeadLines - int(noheader))
         d = self.readData(filename, skiprows=skip, *args, **kwargs)
 
-        #generate an empty table and fill it
+        # generate an empty table and fill it
         tab = Table()
         tab.header = description
 
-        #add each column
+        # add each column
         for k in range( len(header) ):
             colName = header[k]
             if colName in colInfo:
@@ -141,7 +139,7 @@ class csvBackend(BaseBackend):
                            description=colComm or '',
                            format=colfmt,
                            dtype=d.dtype[k] )
-        #set aliases
+        # set aliases
         for k in aliases:
             tab.set_alias(k[0], k[1])
 
@@ -233,9 +231,8 @@ class csvBackend(BaseBackend):
             unit.close()
 
 
-#==============================================================================
+# =============================================================================
 class asciiBackend(BaseBackend):
-#==============================================================================
     def __init__(self):
         """ constructor """
         BaseBackend.__init__(self, tableType='csv')
@@ -260,10 +257,10 @@ class asciiBackend(BaseBackend):
         else:
             stream = open(filename, 'r')
 
-        #get emtpy header
+        # get emtpy header
         description = TableHeader()
 
-        #ColumnHeader(dtype, unit=None, description=None, null=None, format=None, aliases=None)
+        # ColumnHeader(dtype, unit=None, description=None, null=None, format=None, aliases=None)
         colInfo = {}
         aliases = []
         nHeadLines = 0
@@ -274,20 +271,20 @@ class asciiBackend(BaseBackend):
             nHeadLines += 1
             if line[0] == comment:
                 if line[1] != comment:
-                    #get table header
+                    # get table header
                     k = line[1:].split('\t')
                     if k[0] != '':
                         key = k[0].split()[0]  # remove trailing spaces
                     else:
                         key = k[1].split()[0]
-                    #check aliases
+                    # check aliases
                     if key[:5] != 'alias':
                         for cv in k[1:]:
                             description[key] = cv
                     else:
                         aliases.append(k[1].split('='))
                 else:
-                    #get columns meta
+                    # get columns meta
                     k = line[2:].split('\t')
                     colName = k[0].split()[0]
                     if len(k) > 1:
@@ -317,7 +314,7 @@ class asciiBackend(BaseBackend):
         if not hasattr(filename, 'read'):
             stream.close()
 
-        if not 'NAME' in description.keys():
+        if 'NAME' not in description.keys():
             description['NAME'] = filename.split('/')[-1]
         return nHeadLines, description, colInfo, header, aliases
 
@@ -331,22 +328,21 @@ class asciiBackend(BaseBackend):
         exportdata module.
         So far it uses also the np.recfromtxt method
         """
-
-        #Get header
+        # Get header
         nHeadLines, description, colInfo, header, aliases = self.readHeader(filename, comment, noheader, delimiter)
 
-        #get data
+        # get data
         if hasattr(filename, 'read'):
             if not filename.closed:
                 filename.seek(0)
         skip = skiprows + (nHeadLines - int(noheader))
         d = self.readData(filename, skiprows=skip, names=header, *args, **kwargs)
 
-        #generate an empty table and fill it
+        # generate an empty table and fill it
         tab = Table()
         tab.header = description
 
-        #add each column
+        # add each column
         for k in range( len(header) ):
             colName = header[k]
             if colName in colInfo:
@@ -374,7 +370,7 @@ class asciiBackend(BaseBackend):
                                description=colComm or '',
                                format=colfmt,
                                dtype=d.dtype[k] )
-        #set aliases
+        # set aliases
         for k in aliases:
             tab.set_alias(k[0], k[1])
 

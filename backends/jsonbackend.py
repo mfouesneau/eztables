@@ -1,7 +1,7 @@
 """ JSON Backend
 	read/write handles: units, column comments, aliases, header keywords
 """
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 import os, inspect, sys
 localpath = '/'.join(os.path.abspath(inspect.getfile(inspect.currentframe())).split('/')[:-1])
 import numpy as np

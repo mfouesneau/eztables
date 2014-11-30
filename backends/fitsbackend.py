@@ -1,7 +1,7 @@
 """ FITS Backend
     read/write handles: units, column comments, aliases, header keywords
 """
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 import os
 import inspect
 localpath = '/'.join(os.path.abspath(inspect.getfile(inspect.currentframe())).split('/')[:-1])
@@ -202,7 +202,7 @@ class fitsBackend(BaseBackend):
         elif not append:
             hdr.writeto(output, clobber=clobber)
             if not silent:
-                print "Data exported into %s" % output
+                print("Data exported into %s" % output)
         else:
             if not hasattr(output, 'write'):
                 if (hdr0 is None):
@@ -219,7 +219,7 @@ class fitsBackend(BaseBackend):
                     if retHdr:
                         return hdr0
                 if not silent:
-                    print "Data added into %s" % output
+                    print("Data added into %s" % output)
         if not hasattr(output, 'write'):
             if global_attrs is not None:
                 if hdr0 is None:
@@ -229,4 +229,4 @@ class fitsBackend(BaseBackend):
                 hdr0.flush()
                 hdr0.close()
                 if not silent:
-                    print "Keywords added to main table into %s" % output
+                    print("Keywords added to main table into %s" % output)
